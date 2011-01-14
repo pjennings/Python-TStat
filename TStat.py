@@ -62,12 +62,14 @@ class CacheEntry:
 		return datetime.datetime.now()-self.time
 
 class TStat:
-	def __init__(self, address, cacheExpiry=5, api=None, logger=None):
+	def __init__(self, address, cacheExpiry=5, api=None, logger=None, logLevel=None):
 		self.address = address
 		self.setCacheExpiry(cacheExpiry)
 		self.cache = {}
 		if logger is None:
-			logging.basicConfig(level=logging.DEBUG)
+			if logLevel is None:
+				logLevel = logging.WARNING
+			logging.basicConfig(level=logLevel)
 			self.logger = logging.getLogger('TStat')
 		else:
 			self.logger = logger
@@ -147,7 +149,10 @@ class TStat:
 		# Allow mappings to subdictionaries in json data
 		# e.g. 'today/heat_runtime' from '/tstat/datalog'
 		for key in getter[1].split("/"):
-			response = response[key]
+			try:
+				response = response[key]
+			except:
+				pass
 
 		#response = response[getter[1]]
 
@@ -247,3 +252,14 @@ class TStat:
 		if not state:
 			command = "off"
 		return self._post("/cloud/mode", {'command': command})
+
+def main():
+	import sys
+	addr = sys.argv[1]
+	t = TStat(addr)
+	for cmd in sys.argv[2:]:
+		result = eval("t.%s()" % cmd)
+		print "%s: %s" % (cmd, result)
+
+if __name__ == '__main__':
+	main()
