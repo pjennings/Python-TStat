@@ -258,8 +258,9 @@ def main():
 	addr = sys.argv[1]
 	t = TStat(addr)
 	for cmd in sys.argv[2:]:
-		result = eval("t.%s()" % cmd)
-		print "%s: %s" % (cmd, result)
+		result = eval("t.%s(raw=True)" % cmd)
+		#print "%s: %s" % (cmd, result)
+		print result
 
 if __name__ == '__main__':
 	main()
