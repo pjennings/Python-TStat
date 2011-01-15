@@ -70,14 +70,15 @@
 #   well.
 
 class APIEntry:
-	def __init__(self, getters, setters, valueMap=None):
+	def __init__(self, getters, setters, valueMap=None, usesJson=None):
 		self.getters = getters
 		self.setters = setters
 		self.valueMap = valueMap
+		self.usesJson = usesJson
 
 class API:
-	versions = []
 	models = []
+	successStrings = []
 	entries = None
 
 	def __getitem__(self, item):
@@ -95,6 +96,11 @@ class API:
 
 class API_CT50v109(API):
 	models = ['CT50 V1.09']
+	successStrings = [
+						"Tstat Command Processed",
+						"Cloud updates have been suspended till reboot",
+						"Cloud updates activated"
+	]
 	entries = {
 		'fmode': APIEntry(
 			[('/tstat/fmode', 'fmode'), ('/tstat', 'fmode')],
@@ -179,6 +185,11 @@ class API_CT50v109(API):
 		'power': APIEntry(
 			[('/tstat/power', 'power')],
 			[('/tstat/power', 'power')]
+		),
+		'cloud_mode': APIEntry(
+			[],
+			[('/cloud/mode', 'command')],
+			usesJson=False
 		)
 		#'eventlog': #TODO
 	}
