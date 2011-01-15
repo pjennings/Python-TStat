@@ -131,27 +131,25 @@ class API_CT50v109(API):
 		'tstate': APIEntry(
 			[('/tstat', 'tstate')],
 			[],
-			None # TODO: figure out state mapping
+			{0: 'Off', 1: 'On'}
 		),
 		'fstate': APIEntry(
 			[('/tstat', 'fstate')],
 			[],
-			None # TODO: figure out state mapping
+			{0: 'Off', 1: 'On'}
 		),
 		'day': APIEntry(
 			[('/tstat', 'time/day'), ('/tstat/time/day', 'day')],
 			[],
-			None # TODO: Decide how date mapping should work
+			{1: 'Sunday', 2: 'Monday', 3: 'Tuesday', 4: 'Wednesday', 5: 'Thursday', 6: 'Friday', 7: 'Saturday'}
 		),
 		'hour': APIEntry(
 			[('/tstat', 'time/hour'), ('/tstat/time/hour', 'day')],
-			[],
-			None # TODO: Decide how date mapping should work
+			[]
 		),
 		'minute': APIEntry(
 			[('/tstat', 'time/minute'), ('/tstat/time/minute', 'day')],
-			[],
-			None # TODO: Decide how date mapping should work
+			[]
 		),
 		'today_heat_runtime': APIEntry(
 			[('/tstat/datalog', 'today/heat_runtime')],
@@ -171,11 +169,16 @@ class API_CT50v109(API):
 		),
 		'errstatus': APIEntry(
 			[('/tstat/errstatus', 'errstatus')],
-			[]
+			[],
+			{0: 'OK'}
 		),
 		'model': APIEntry(
 			[('/tstat/model', 'model')],
 			[]
+		),
+		'power': APIEntry(
+			[('/tstat/power', 'power')],
+			[('/tstat/power', 'power')]
 		)
 		#'eventlog': #TODO
 	}
