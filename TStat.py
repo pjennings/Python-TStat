@@ -48,8 +48,17 @@
 import datetime
 import httplib
 import urllib
-import json
 import logging
+
+# For Python < 2.6, this json module:
+# http://pypi.python.org/pypi/python-json
+# will work.
+try:
+	from json import read as loads
+	from json import write as dumps
+except ImportError:
+	from json import loads
+	from json import dumps
 
 from API import *
 
@@ -120,7 +129,7 @@ class TStat:
 			location = setter[0]
 			jsonKey = setter[1]
 			if entry.usesJson:
-				params = json.dumps({jsonKey: value})
+				params = dumps({jsonKey: value})
 			else:
 				params = urllib.urlencode({jsonKey: value})
 
@@ -200,7 +209,7 @@ class TStat:
 				response.close()
 				l.debug("Got response: %s" % data)
 				try:
-					response = json.loads(data)
+					response = loads(data)
 					break
 				except:
 					l.warning("Some problem with response: %s" % data)
