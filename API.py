@@ -70,7 +70,7 @@
 #   well.
 
 class APIEntry:
-	def __init__(self, getters, setters, valueMap=None, usesJson=None):
+	def __init__(self, getters, setters, valueMap=None, usesJson=True):
 		self.getters = getters
 		self.setters = setters
 		self.valueMap = valueMap
