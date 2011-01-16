@@ -132,6 +132,7 @@ class TStat:
 				params = dumps({jsonKey: value})
 			else:
 				params = urllib.urlencode({jsonKey: value})
+			l.debug("Will send params: %s" % params)
 
 			headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
 			conn = self._getConn()
