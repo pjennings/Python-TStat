@@ -49,6 +49,8 @@ import datetime
 import httplib
 import urllib
 import logging
+import random
+import time
 
 # For Python < 2.6, this json module:
 # http://pypi.python.org/pypi/python-json
@@ -86,6 +88,7 @@ class TStat:
 		if api is None:
 			self.api = API()
 			self.api = getAPI(self.getModel())
+			time.sleep(2)
 		else:
 			self.api = api
 
@@ -135,9 +138,15 @@ class TStat:
 			l.debug("Will send params: %s" % params)
 
 			headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
-			conn = self._getConn()
-			conn.request("POST", location, params, headers)
-			response = conn.getresponse()
+			response = None
+			count = 0
+			while response is None and count < 5:
+				conn = self._getConn()
+				conn.request("POST", location, params, headers)
+				response = conn.getresponse()
+				if response is None:
+					time.sleep(count*random.randint(0, 3))
+				count = count + 1
 			if response.status != 200:
 				l.error("Error %s while trying to set '%s' with '%s'" % (response.status, location, params))
 				continue
@@ -199,9 +208,15 @@ class TStat:
 		else:
 			for getter in entry.getters:
 				# Either data was not cached or cache was expired
-				conn = self._getConn()
-				conn.request("GET", getter[0])
-				response = conn.getresponse()
+				response = None
+				count = 0
+				while response is None and count < 5:
+					conn = self._getConn()
+					conn.request("GET", getter[0])
+					response = conn.getresponse()
+					if response is None:
+						time.sleep(count*random.randint(0, 10))
+					count = count + 1
 				if response.status != 200:
 					l.warning("Request for '%s' failed (error %s)" % (getter[0], response.status))
 					response = None
@@ -357,7 +372,7 @@ class TStat:
 def main():
 	import sys
 	addr = sys.argv[1]
-	t = TStat(addr)
+	t = TStat(addr, api=API_CT50v109())
 	for cmd in sys.argv[2:]:
 		result = eval("t.%s(raw=True)" % cmd)
 		#print "%s: %s" % (cmd, result)
