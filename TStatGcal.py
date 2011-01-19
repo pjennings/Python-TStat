@@ -29,6 +29,72 @@
 
 VERSION = 1.0
 
+# TStatGcal.py
+# Script to pull commands from Google Calendar and update thermostat.
+#
+# Requirements:
+# * gdata (http://code.google.com/p/gdata-python-client/)
+# * ElementTree (http://effbot.org/zone/element-index.htm)
+# * Python-TStat (same place you got this script)
+#
+# Usage:
+# 1. Create a Google/GMail account (or Google Apps for domains).
+# 2. Go to http://calendar.google.com
+# 3. Create a calendar (called "Thermostat" for example).
+# 4. Add events with titles of the form:
+#    "Heat 70"  -- sets heat to 70 degrees
+#    "Cool 70"  -- sets cool to 70 degrees
+#    "Fan On"   -- forces fan on
+#    "Mode Off" -- forces system off
+# 5. Run the following commands (assuming Unix/Linux system):
+#    echo "youraccount@gmail.com" >> ~/.google
+#    echo "yourpassword" >> ~/.google
+#    chmod 400 ~/.google
+#    (where "youraccount@gmail.com" is the account that you created in 
+#     step 1 and "yourpassword" is your password)
+# 6. Add the following to your crontab to run every 5 minutes or so:
+#      TStatGcal.py <thermostat_address> <calendar_name>
+#    Where <thermostat_address> is the IP address of your thermostat 
+#    and <calendar_name> is the name of the calendar you created in 
+#    step 3.
+#
+# Notes:
+#    In order to limit the chance that this script sets your 
+#    thermostat to dangerous settings (e.g. too low or off during 
+#    the winter, there are some override variables below:
+#      HEAT_MIN, HEAT_MAX: Minimum/maximum setting for heat
+#      COOL_MIN, COOL_MAX: Minimum/maximum setting for cool
+#      COMMANDS: What parts of the thermostat the script is 
+#                allowed to control
+#
+#    Set the HEAT/COOL variables to appropriate values for your 
+#    situation.  By default, this script will not set the 
+#    thermostat mode (on/off/auto).  You probably want to leave 
+#    it on auto.  This is to prevent a hacker (or a typo) from 
+#    turning your furnace off during the winter.  
+#
+#    By default, this script does not disable cloud updates. 
+#    That way, if this script does not run for some reason (e.g. 
+#    if your computer crashes), you can still have a reasonable 
+#    backup program running.  When the cloud updates your thermostat,
+#    there may be a short period where the setting does not match
+#    what is on your calendar.  If this behavior is undesirable, you
+#    can disable cloud updates.  
+#
+#    At the start time of your event, the script will set the 
+#    the thermostat to the requested setting.  The duration of the 
+#    events on your calendar is ignored.  For example, a simple
+#    program might look like this:
+#      6:30 -- Heat 70
+#      8:00 -- Heat 60
+#     16:00 -- Heat 70
+#     22:00 -- Heat 60
+#    In order to create this program in your calendar, you would need 
+#    four events.  If you create a "Heat 70" event that lasts from 
+#    6:30-22:00 and an overlapping "Heat 60" event that lasts from 
+#    8:00-16:00, you will effectively miss the "Heat 70" command at 
+#    16:00.  Only the start time of the event is used.  
+
 # Minimum and maximum values for heat and cool
 # The script will never set values outside of this range
 HEAT_MIN = 55
@@ -40,7 +106,8 @@ COOL_MAX = 100
 # Remove commands that you don't want the script to execute here
 # mode in particular can be dangerous, because someone could create 
 # a 'mode off' command and turn your heat off in the winter.
-COMMANDS = ['Heat', 'Cool', 'Mode', 'Fan']
+#COMMANDS = ['Heat', 'Cool', 'Mode', 'Fan']
+COMMANDS = ['Heat', 'Cool', 'Fan']
 
 try:
   from xml.etree import ElementTree # for Python 2.5 users
@@ -93,6 +160,7 @@ def main(tstatAddr, username=None, password=None, calName="Thermostat"):
 		return
 
 	# Search for the event that has passed but is closest to the current time
+	# There is probably a better way to do this...
 	closest = None
 	closestDT = None
 	closestWhen = None
