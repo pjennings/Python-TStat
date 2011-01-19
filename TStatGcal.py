@@ -147,11 +147,19 @@ def main(tstatAddr, username=None, password=None, calName="Thermostat"):
 	print "Closest event: %s at %s" % (text, closestDT)
 	(command, value) = text.splitlines()[0].split()
 	if command == 'Heat':
-		print "Setting heat to %s" % int(value)
-		tstat.setHeatPoint(int(value))
+		value = int(value)
+		if value >= HEAT_MIN and value <= HEAT_MAX:
+			print "Setting heat to %s" % int(value)
+			tstat.setHeatPoint(value)
+		else:
+			print "Value out of acceptable heat range:", value
 	elif command == 'Cool':
-		print "Setting cool to %s" % value
-		tstat.setCoolPoint(int(value))
+		value = int(value)
+		if value >= COOL_MIN and value <= COOL_MAX:
+			print "Setting cool to %s" % value
+			tstat.setCoolPoint(int(value))
+		else:
+			print "Value out of acceptable cool range:", value
 	elif command == 'Fan':
 		print "Setting fan to %s" % value
 		tstat.setFanMode(value)
