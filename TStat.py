@@ -50,6 +50,7 @@ import httplib
 import urllib
 import logging
 import random
+import socket
 import time
 
 # For Python < 2.6, this json module:
@@ -141,9 +142,12 @@ class TStat:
 			response = None
 			count = 0
 			while response is None and count < 5:
-				conn = self._getConn()
-				conn.request("POST", location, params, headers)
-				response = conn.getresponse()
+				try:
+					conn = self._getConn()
+					conn.request("POST", location, params, headers)
+					response = conn.getresponse()
+				except socket.error:
+					response = None
 				if response is None:
 					time.sleep(count*random.randint(0, 3))
 				count = count + 1
@@ -211,9 +215,12 @@ class TStat:
 				response = None
 				count = 0
 				while response is None and count < 5:
-					conn = self._getConn()
-					conn.request("GET", getter[0])
-					response = conn.getresponse()
+					try:
+						conn = self._getConn()
+						conn.request("GET", getter[0])
+						response = conn.getresponse()
+					except socket.error:
+						response = None
 					if response is None:
 						time.sleep(count*random.randint(0, 10))
 					count = count + 1
