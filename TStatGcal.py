@@ -128,9 +128,13 @@ import time
 
 import TStat
 
-def main(tstatAddr, username=None, password=None, calName="Thermostat"):
+def main(tstatAddr, commandMap=None, username=None, password=None, calName="Thermostat"):
 	# Connect to thermostat
 	tstat = TStat.TStat(tstatAddr)
+
+	# Command map is used to translate things like "Wake" into "Heat 70"
+	if commandMap is None:
+		commandMap = {}
 
 	# Log in to Google
 	calendar_service = gdata.calendar.service.CalendarService()
@@ -165,13 +169,26 @@ def main(tstatAddr, username=None, password=None, calName="Thermostat"):
 	closestDT = None
 	closestWhen = None
 	closestEvent = None
+	closestCommand = None
+	closestValue = None
 	feed = calendar_service.CalendarQuery(query)
 	for i, an_event in enumerate(feed.entry):
 		#print '\t%s. %s' % (i, an_event.title.text,)
+
+		# Try to map named time period into actual command
+		text = an_event.title.text.strip()
+		if commandMap.has_key(text):
+			text = commandMap[text]
+
+		print "Translated %s into %s" % (an_event.title.text.strip(), text)
+
 		# Skip events that are not valid commands
-		(command, value) = an_event.title.text.splitlines()[0].split()
+		try:
+			(command, value) = text.splitlines()[0].split()
+		except:
+			command = text
 		if command not in COMMANDS:
-			print "Warning: '%s' is not a valid command" % an_event.title.text
+			print "Warning: '%s' is not a valid command" % text
 			continue
 		try:
 			float(value)
@@ -198,6 +215,8 @@ def main(tstatAddr, username=None, password=None, calName="Thermostat"):
 				closestDT = dt
 				closestWhen = a_when
 				closestEvent = an_event
+				closestCommand = command
+				closestValue = value
 			else:
 				if d.days < closest.days:
 					continue
@@ -206,6 +225,8 @@ def main(tstatAddr, username=None, password=None, calName="Thermostat"):
 					closestDT = dt
 					closestWhen = a_when
 					closestEvent = an_event
+					closestCommand = command
+					closestValue = value
 
 	if closestEvent is None:
 		print "No events found"
@@ -213,7 +234,8 @@ def main(tstatAddr, username=None, password=None, calName="Thermostat"):
 
 	text = closestEvent.title.text
 	print "Closest event: %s at %s" % (text, closestDT)
-	(command, value) = text.splitlines()[0].split()
+	#(command, value) = text.splitlines()[0].split()
+	command, value = (closestCommand, closestValue)
 	if command == 'Heat':
 		value = int(value)
 		if value >= HEAT_MIN and value <= HEAT_MAX:
@@ -239,4 +261,12 @@ if __name__ == '__main__':
 	f = open(os.path.expanduser("~/.google"))
 	username = f.readline().splitlines()[0]
 	password = f.readline().splitlines()[0]
-	main(sys.argv[1], username=username, password=password, calName=sys.argv[2])
+	f.close()
+	if os.path.isfile(os.path.expanduser("~/.tstat_commands")):
+		commandMap = {}
+		f = open(os.path.expanduser("~/.tstat_commands"))
+		for line in f.readlines():
+			key, value = line.split(":")
+			commandMap[key] = value
+		f.close()
+	main(sys.argv[1], username=username, password=password, calName=sys.argv[2], commandMap=commandMap)
