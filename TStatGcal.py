@@ -152,6 +152,9 @@ def main(tstatAddr, commandMap=None, username=None, password=None, calName="Ther
 	query = gdata.calendar.service.CalendarEventQuery()
 	query.start_min = "%04i-%02i-%02i" % (today.year, today.month, today.day)
 	query.start_max = "%04i-%02i-%02i" % (tomorrow.year, tomorrow.month, tomorrow.day)
+	
+	print "start_min:", query.start_min
+	print "start_max:", query.start_max
 
 	# Look for a calendar called calName
 	feed = calendar_service.GetOwnCalendarsFeed()
@@ -240,7 +243,7 @@ def main(tstatAddr, commandMap=None, username=None, password=None, calName="Ther
 		value = int(value)
 		if value >= HEAT_MIN and value <= HEAT_MAX:
 			print "Setting heat to %s" % int(value)
-			tstat.setHeatPoint(value)
+			#tstat.setHeatPoint(value)
 		else:
 			print "Value out of acceptable heat range:", value
 	elif command == 'Cool':
@@ -262,8 +265,8 @@ if __name__ == '__main__':
 	username = f.readline().splitlines()[0]
 	password = f.readline().splitlines()[0]
 	f.close()
+	commandMap = {}
 	if os.path.isfile(os.path.expanduser("~/.tstat_commands")):
-		commandMap = {}
 		f = open(os.path.expanduser("~/.tstat_commands"))
 		for line in f.readlines():
 			key, value = line.split(":")
