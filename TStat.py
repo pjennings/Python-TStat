@@ -376,11 +376,38 @@ class TStat:
 		"""Sets cloud mode to state."""
 		return self._post("cloud_mode", value)
 
+def discover():
+	import struct
+	import select
+	import re
+
+	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+	sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
+	sock.sendto("TYPE: WM-DISCOVER\r\nVERSION: 1.0\r\n\r\nservices: com.marvell.wm.system*\r\n\r\n", ("239.255.255.250", 1900))
+
+	mreq = struct.pack("=4sl", socket.inet_aton("239.255.255.250"), socket.INADDR_ANY)
+	sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+
+	sock.setblocking(0)
+
+	ready = select.select([sock], [], [], 30)
+	data = None
+	if ready[0]:
+		data = sock.recv(4096).replace("\r\n", "\n")
+
+	m = re.search("http://([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)/(.*?)$", data, re.MULTILINE)
+
+	try:
+		return m.group(1)
+	except:
+		raise ValueError, "Didn't find any thermostats on the local network"
+
 def main():
 	import sys
-	addr = sys.argv[1]
+	addr = discover()
+
 	t = TStat(addr, api=API_CT50v109())
-	for cmd in sys.argv[2:]:
+	for cmd in sys.argv[1:]:
 		result = eval("t.%s(raw=True)" % cmd)
 		#print "%s: %s" % (cmd, result)
 		print result
