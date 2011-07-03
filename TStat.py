@@ -208,7 +208,7 @@ class TStat:
 		if newest is not None:
 			# At least one valid entry was found in the cache
 			l.debug("Using cached entry")
-			response = self.cache[newest[0]].data[newest[1]]
+			response = self.cache[newest[0]].data
 		else:
 			for getter in entry.getters:
 				# Either data was not cached or cache was expired
