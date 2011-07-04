@@ -3,6 +3,9 @@
 #Copyright (c) 2011, Paul Jennings <pjennings-tstat@pjennings.net>
 #All rights reserved.
 
+#Contributors:
+# Billy J. West
+
 #Redistribution and use in source and binary forms, with or without 
 #modification, are permitted provided that the following conditions are met:
 #
@@ -341,8 +344,7 @@ class TStat:
 
 	def getTime(self, raw=False):
 		"""Returns current time."""
-		# TODO: time processing
-		pass
+		return {'day': self._get('day'),  'hour': self._get('hour'),  'minute': self._get('minute')}
 
 	def getHeatUsageToday(self, raw=False):
 		"""Returns heat usage for today."""
