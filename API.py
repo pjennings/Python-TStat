@@ -145,13 +145,11 @@ class API_CT50v109(API):
 			{0: 'Off', 1: 'On'}
 		),
 		'day': APIEntry(
-			#[('/tstat', 'time/day'), ('/tstat/time/day', 'day')],
 			[('/tstat', 'time/day')],
 			[],
 			{0: 'Monday', 1: 'Tuesday', 2: 'Wednesday', 3: 'Thursday', 4: 'Friday', 5: 'Saturday', 6: 'Sunday'}
 		),
 		'hour': APIEntry(
-			#[('/tstat', 'time/hour'), ('/tstat/time/hour', 'day')],
 			[('/tstat', 'time/hour')],
 			[]
 		),

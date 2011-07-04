@@ -255,8 +255,6 @@ class TStat:
 			except:
 				pass
 
-		#response = response[getter[1]]
-
 		if raw or entry.valueMap is None:
 			# User requested raw data or there is no value mapping
 			return response
