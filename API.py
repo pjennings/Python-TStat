@@ -195,7 +195,10 @@ class API_CT50v109(API):
 		#'eventlog': #TODO
 	}
 
-APIs = [API_CT50v109]
+class API_CT30v192(API_CT50v109):
+		models = ['CT30 V1.92']
+
+APIs = [API_CT50v109, API_CT30v192]
 
 def getAPI(model):
 	for api in APIs:
