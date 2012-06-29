@@ -6,10 +6,10 @@
 #Contributors:
 # Billy J. West
 
-#Redistribution and use in source and binary forms, with or without 
+#Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
 #
-#    * Redistributions of source code must retain the above copyright notice, 
+#    * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
 #    * Redistributions in binary form must reproduce the above copyright
 #      notice, this list of conditions and the following disclaimer in the
@@ -19,15 +19,15 @@
 #      permission.
 
 #THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-#AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+#AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 #ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-#LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-#CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
-#SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-#INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-#CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-#ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
+#LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+#INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+#CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+#ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 #THE POSSIBILITY OF SUCH DAMAGE.
 
 # TStat.py
@@ -41,17 +41,18 @@
 #
 #
 # A simple cache based on retrieved URL and time of retrieval is included.
-# If you call TStat.getFanMode(), /tstat will be retrieved and the value 
-# for fmode will be return.  If you then call t.getTState(), a cached 
-# value will already exist and tstate will be returned from that.  
+# If you call TStat.getFanMode(), /tstat will be retrieved and the value
+# for fmode will be return.  If you then call t.getTState(), a cached
+# value will already exist and tstate will be returned from that.
 #
-# You can change the time for cache expiration by calling 
-# t.setCacheExpiry(timeInSeconds).  
+# You can change the time for cache expiration by calling
+# t.setCacheExpiry(timeInSeconds).
 
 import datetime
 import httplib
 import urllib
 import logging
+import pickle
 import random
 import socket
 import time
@@ -78,10 +79,13 @@ class CacheEntry:
 		return datetime.datetime.now()-self.time
 
 class TStat:
-	def __init__(self, address, cacheExpiry=5, api=None, logger=None, logLevel=None):
+	def __init__(self, address, cacheExpiry=5, api=None, logger=None, logLevel=None, cacheFn=None):
 		self.address = address
 		self.setCacheExpiry(cacheExpiry)
 		self.cache = {}
+                self.cacheFn = cacheFn
+                if self.cacheFn:
+                    self.cache = pickle.loads(open(self.cacheFn).read())
 		if logger is None:
 			if logLevel is None:
 				logLevel = logging.WARNING
@@ -247,6 +251,8 @@ class TStat:
 				l.error("Unable to retrieve '%s' from any of %s" % (key, entry.getters))
 				return
 			self.cache[getter[0]] = CacheEntry(getter[0], response)
+                        if self.cacheFn:
+                            open(self.cacheFn, "w").write(pickle.dumps(self.cache))
 
 		# Allow mappings to subdictionaries in json data
 		# e.g. 'today/heat_runtime' from '/tstat/datalog'
