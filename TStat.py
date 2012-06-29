@@ -236,7 +236,8 @@ class TStat:
 				l.debug("Got response: %s" % data)
 				try:
 					response = loads(data)
-					break
+					if 'error_msg' not in response:
+						break
 				except:
 					l.warning("Some problem with response: %s" % data)
 					response = None
