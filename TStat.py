@@ -84,7 +84,7 @@ class TStat:
 		self.setCacheExpiry(cacheExpiry)
 		self.cache = {}
                 self.cacheFn = cacheFn
-                if self.cacheFn:
+                if self.cacheFn and os.path.isfile(self.cacheFn):
                     self.cache = pickle.loads(open(self.cacheFn).read())
 		if logger is None:
 			if logLevel is None:
